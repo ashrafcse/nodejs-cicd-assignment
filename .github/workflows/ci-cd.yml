@@ -1,25 +1,61 @@
-test:
-  name: Test Application
-  runs-on: ubuntu-latest
+name: Node.js CI/CD Pipeline
 
-  steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+on:
+  push:
+    branches:
+      - main
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
+jobs:
 
-    - name: Install Dependencies
-      run: npm install
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
 
-    - name: Run Tests
-      run: |
-        npm run check > test-results.txt
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Upload Test Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: test-results.txt
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: |
+          npm run check > test-results.txt
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results.txt
+
+  deploy:
+    name: Deploy Application
+    needs: test
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+
+      - name: Display Test Results
+        run: |
+          echo "========== TEST RESULTS =========="
+          cat test-results.txt
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Deploy Application
+        run: |
+          chmod +x deploy.sh
+          ./deploy.sh
