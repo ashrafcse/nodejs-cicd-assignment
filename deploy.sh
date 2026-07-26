@@ -1,19 +1,14 @@
 #!/bin/bash
 
+echo "===== Starting Deployment ====="
 
-echo "Starting deployment..."
+echo "Installing dependencies..."
+npm install
 
+echo "Stopping old application..."
+pkill -f "node src/server.js" || true
 
-# Stop previous application
-
-pkill node || true
-
-
-
-# Start application
-
+echo "Starting application..."
 nohup npm start > app.log 2>&1 &
 
-
-
-echo "Application deployed successfully"
+echo "===== Deployment Successful ====="
